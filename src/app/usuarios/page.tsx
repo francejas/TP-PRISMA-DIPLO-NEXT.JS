@@ -39,7 +39,7 @@ export default async function Pagina() {
                                 {usuario.nombre} - {usuario.edad}
                             </li>
                             <li>
-                                {publicaciones.map((publicacion: Publicacion) => (
+                                {publicaciones.map((publicacion: Publicacion) => (                   //aca me gustaria agregar una verificacion donde vea si el usuario tiene publicaciones, si no las tiene qe aparezca un cartel diciendo qe no hay publicaciones 
                                     <ul key={publicacion.id}>
                                         <li>
                                             {publicacion.titulo} - {publicacion.contenido}
