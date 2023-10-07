@@ -8,17 +8,19 @@ datasource db {
 }
 
 model Usuario {
-  id       String  @id @default(uuid()) // UNIQUE USER IDENTIFICATION
-  nombre   String
-  email    String  @unique
-  password String
-  edad     Int
-  activo   Boolean @default(true)
+  id          String        @id @default(uuid()) // UNIQUE USER IDENTIFICATION
+  nombre      String
+  email       String        @unique
+  password    String
+  edad        Int
+  activo      Boolean       @default(true)
+  Publicacion Publicacion[]
 }
 
 model Publicacion {
-  id String @id @default(uuid())
-  titulo String
+  id        String  @id @default(uuid())
+  usuario   Usuario @relation(fields: [autorId], references: [id])
+  titulo    String
   contenido String
-  autorId String
+  autorId   String
 }
