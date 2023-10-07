@@ -1,129 +1,56 @@
-import { Publicacion } from "@prisma/client";
+
+import { Publicacion, Usuario } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 async function obtenerUsuarios() {
-    const respuesta = await fetch("http://localhost:3000/api/usuarios", {
-        cache: "no-store",
+    const usuarios = await prisma.usuario.findMany({
+        where: {
+            edad: { gt: 25 },                                         //gt significa mayor qe
+        },
     });
-    const datosUsuario = await respuesta.json();
-    return datosUsuario;
+    return usuarios;
 }
 
-async function obtenerPublicaciones() {
-    const respestaPublicacion = await fetch("http://localhost:3000/api/usuarios/Publicaciones", {
-        cache: "no-store",
-    });
-    const usuarioPublicacion = await respestaPublicacion.json();
-    return usuarioPublicacion;
-}
 
-type Usuario = {
-    id: string;
-    nombre: string;
-    edad: number;
-    email: string;
-    password: string;
-    activo: boolean;
-    Publicacion: Publicacion[]
-};
+
+async function obtenerPublicaciones(usuarioId: string) {      // Esto es la lista de parámetros de la función. En este caso, la función toma un parámetro llamado usuarioId, que se espera que sea de tipo string. Los parámetros son valores que se pueden pasar a la función cuando se llama, y la función puede usarlos internamente.
+    const publicaciones = await prisma.publicacion.findMany({
+        where: {
+            autorId: usuarioId,                             //la condición es que la propiedad autorId en la tabla de "publicacion" debe coincidir con el valor de usuarioId que se pasó como argumento a la función.  
+        },
+    });
+    return publicaciones;
+}
 
 export default async function Pagina() {
     const usuarios = await obtenerUsuarios();
-    const publicaciones = await obtenerPublicaciones();
 
     return (
         <section>
             <h2>Usuarios mayores de 25 años</h2>
-
             <ul>
-                {usuarios
-                    .filter((usuario: Usuario) => usuario.edad > 25)
-                    .map((usuario: Usuario) => (
-                        <main>
-                        <li key={usuario.id}>
-                            {usuario.nombre} - {usuario.edad}
-                        </li>
-                        <li>
-                        {publicaciones.map((publicacion: Publicacion) => (
+                {usuarios.map(async (usuario: Usuario) => {
+                    const publicaciones = await obtenerPublicaciones(usuario.id);
+                    return (
+                        <main key={usuario.id}>
                             <li>
-                                {publicacion.titulo} - {publicacion.contenido}
+                                {usuario.nombre} - {usuario.edad}
                             </li>
-                        ))}
-                        </li>
+                            <li>
+                                {publicaciones.map((publicacion: Publicacion) => (
+                                    <ul key={publicacion.id}>
+                                        <li>
+                                            {publicacion.titulo} - {publicacion.contenido}
+                                        </li>
+                                    </ul>
+                                ))}
+                            </li>
                         </main>
-                    ))}
+                    );
+                })}
             </ul>
         </section>
     );
-
 }
-
-
-
-// ME GUSTARIA AGREGARLE UNA VERIFICACION PARA QE SI EL USUARIO NO TIENE NIINGUNA PUBLICACION SE MUESTRE QE NO HAY NINGUNA PUBLICACION PERO NO LOGRO HACERLO
-//LINEA 110
-//
-
-
-
-// import { Publicacion } from "@prisma/client";
-
-// async function obtenerUsuarios() {
-//     const respuesta = await fetch("http://localhost:3000/api/usuarios", {
-//         cache: "no-store",
-//     });
-//     const datosUsuario = await respuesta.json();
-//     return datosUsuario;
-// }
-
-// async function obtenerPublicaciones() {
-//     const respestaPublicacion = await fetch("http://localhost:3000/api/usuarios/Publicaciones", {
-//         cache: "no-store",
-//     });
-//     const usuarioPublicacion = await respestaPublicacion.json();
-//     return usuarioPublicacion;
-// }
-
-// type Usuario = {
-//     id: string;
-//     nombre: string;
-//     edad: number;
-//     email: string;
-//     password: string;
-//     activo: boolean;
-//     Publicacion: Publicacion[];
-// };
-
-// export default async function Pagina() {
-//     const usuarios = await obtenerUsuarios();
-//     const publicaciones = await obtenerPublicaciones();
-
-//     return (
-//         <section>
-//             <h2>Usuarios mayores de 25 años</h2>
-//             <ul>
-//                 {usuarios
-//                     .filter((usuario: Usuario) => usuario.edad > 25)
-//                     .map((usuario: Usuario) => (
-//                         <main key={usuario.id}>
-//                             <li>
-//                                 {usuario.nombre} - {usuario.edad}
-//                             </li>
-//                             <li>
-//                                 {usuario.Publicacion && usuario.Publicacion.length > 0 ? (
-//                                     <ul>
-//                                         {usuario.Publicacion.map((publicacion: Publicacion) => (
-//                                             <li key={publicacion.id}>
-//                                                 {publicacion.titulo} - {publicacion.contenido}
-//                                             </li>
-//                                         ))}
-//                                     </ul>
-//                                 ) : (
-//                                     <p>No hay publicaciones</p>
-//                                 )}
-//                             </li>
-//                         </main>
-//                     ))}
-//             </ul>
-//         </section>
-//     );
-// }
